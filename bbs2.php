@@ -1,5 +1,8 @@
 <?php 
+  session_start();
 
+  require('dbconnect_bbs2.php');
+  
   // INSERT
   if (!empty($_POST)) {
     $nickname=$_POST['nickname'];
@@ -11,20 +14,17 @@
     $comment = $_POST['comment'];
   }
 
-  require('dbconnect_bbs2.php');
-  
+    
   if($nickname!='' && $comment!=''){
     $i_sql="INSERT INTO `tweets` SET `id`='".$id."',nickname=?,comment=?, created=NOW()";
-    $data=array($nickname,$comment);
-    $stmt = $dbh->prepare($i_sql); 
-    $stmt->execute($data);
-
-    $dbh = null;
+    $i_data=array($nickname,$comment);
+    $i_stmt = $dbh->prepare($i_sql); 
+    $i_stmt->execute($i_data);
 
     $tweets=array();
 
     while (1) {
-      $record=$stmt->fetch(PDO::FETCH_ASSOC);
+      $record=$i_stmt->fetch(PDO::FETCH_ASSOC);
       if($record==false){
         break;
       }
@@ -39,16 +39,14 @@
   // SERECT
   require('dbconnect_bbs2.php');
 
-  $sql='SELECT * FROM `tweets` ORDER BY `created`DESC';
+  $s_sql='SELECT * FROM `tweets` ORDER BY `created`DESC';
 
-  $stmt = $dbh->prepare($sql); 
-  $stmt->execute();
-
-  $dbh = null;
+  $s_stmt = $dbh->prepare($s_sql); 
+  $s_stmt->execute();
 
   $tweets=array();
   while (1) {
-    $record=$stmt->fetch(PDO::FETCH_ASSOC); 
+    $record=$s_stmt->fetch(PDO::FETCH_ASSOC); 
     if($record==false){
       break;
     }
@@ -56,7 +54,7 @@
     $tweets[]=$record;
  }
 
- var_dump($tweets);
+ // var_dump($tweets);
 ?>
 
 
@@ -76,7 +74,7 @@
 </head>
 <body>
   <!-- ナビゲーションバー -->
-  <!-- <nav class="navbar navbar-default navbar-fixed-top"> -->
+  <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
           <!-- Brand and toggle get grouped for better mobile display -->
           <div class="navbar-header page-scroll">
@@ -153,6 +151,9 @@
                         </p>
                         <a href="edit.php?id=<?php echo $t['id']; ?>">
                           EDIT
+                        </a>
+                        <a href="delete.php?id=<?php echo $t['id']; ?>" onclick="return confirm('本当に削除しますか？')">
+                          DELETE
                         </a>
                     </div>
                 </div>
